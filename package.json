@@ -1,0 +1,23 @@
+{
+  "name": "colours_server",
+  "version": "1.0.0",
+  "description": "Server for a card game",
+  "main": "index.ts",
+  "scripts": {
+    "nodemon": "nodemon dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Farzam Noori",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.8",
+    "@types/socket.io": "^2.1.11",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "nodemon": "^2.0.4",
+    "typescript": "^4.0.3"
+  }
+}
