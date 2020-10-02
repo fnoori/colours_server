@@ -1,6 +1,7 @@
 export class Player {
     private _id: string
-    private _username: string
+    private _socketId: number
+    private _name: string
     private _device: Devices
     private _isReady: false
     private _teamId: number
@@ -13,12 +14,20 @@ export class Player {
         this._id = value;
     }
 
-    get username(): string {
-        return this._username;
+    get socketId(): number {
+        return this._socketId;
     }
 
-    set username(value: string) {
-        this._username = value;
+    set socketId(value: number) {
+        this._socketId = value;
+    }
+
+    get name(): string {
+        return this._name;
+    }
+
+    set name(value: string) {
+        this._name = value;
     }
 
     get device(): Devices {

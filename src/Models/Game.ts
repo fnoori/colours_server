@@ -1,12 +1,19 @@
 import {Player} from "./Player";
+import {GameFullError} from "../exceptions/GameFullError";
+import * as _ from 'lodash'
+import {Utilities} from "../utilities/Utilities";
 
-class Game {
+export class Game {
+    private readonly MAX_PLAYERS = 4
+
     private _gameId: string
-    private _players: Player[]
+    private _players: Array<Player>
     private _playerTurn: number
     private _teamPoints: object
 
     constructor() {
+        this._players = []
+        this._gameId = Utilities.generateUniqueGameId()
         this.initializeTeamPoints()
     }
 
@@ -14,6 +21,18 @@ class Game {
         this._teamPoints = {
             0: 0,
             1: 0
+        }
+    }
+
+    public addPlayer(player: Player) {
+        this.gameIsFull()
+
+        this._players.push(player)
+    }
+
+    private gameIsFull() {
+        if (this._players !== undefined && this._players.length >= this.MAX_PLAYERS) {
+            throw new GameFullError()
         }
     }
 

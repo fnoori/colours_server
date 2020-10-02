@@ -1,6 +1,8 @@
 import { createServer, Server } from 'http'
 import * as express from 'express'
 import * as socketIo from 'socket.io'
+import {Game} from "./Models/Game";
+import {Player} from "./Models/Player";
 
 export class GameServer {
     public static readonly PORT:number = Number(process.env.PORT) || 3000
@@ -8,6 +10,8 @@ export class GameServer {
     private server: Server
     private io: socketIo.Server
     private port: string | number
+
+    private games = {}
 
     constructor() {
         this.createApp()
@@ -44,6 +48,42 @@ export class GameServer {
 
         this.io.on('connect', (socket: any) => {
             console.log(`Client connected on port ${this.port}`)
+
+            socket.on('create-game', (name: string) => {
+                try {
+                    let game = new Game()
+                    let player = new Player()
+                    player.name = name
+                    player.socketId = socket.id
+
+                    game.addPlayer(player)
+
+                    this.games[game.gameId] = game
+
+                    socket.emit('create-game', 'successfully created game')
+                } catch (e) {
+                    socket.emit('create-game', 'failed to create game')
+                }
+            })
+
+            socket.on('join-game', (details: {
+                gameId: string,
+                name: string
+            }) => {
+                try {
+                    let game = this.games[details.gameId]
+
+                    let player = new Player()
+                    player.name = details.name
+                    player.socketId = socket.id
+
+                    game.addPlayer(player)
+
+                    this.io.emit('join-game', `${details.name} successfully joined game ${details.gameId}`)
+                } catch (e) {
+                    socket.emit('join-game', `failed to join game ${details.gameId}`)
+                }
+            })
 
             socket.on('message', (m: string) => {
                 console.log(`[server](message): ${m}`)
