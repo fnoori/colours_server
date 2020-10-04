@@ -2,6 +2,7 @@ import {Player} from "./Player";
 import {GameFullError} from "../exceptions/GameFullError";
 import * as _ from 'lodash'
 import {Utilities} from "../utilities/Utilities";
+import {Card} from "./Card";
 
 export class Game {
     private readonly MAX_PLAYERS = 4
@@ -10,6 +11,7 @@ export class Game {
     private _players: Array<Player>
     private _playerTurn: number
     private _teamPoints: object
+    private _cards: [Card]
 
     constructor() {
         this._players = []

@@ -3,6 +3,9 @@ import * as express from 'express'
 import * as socketIo from 'socket.io'
 import {Game} from "./Models/Game";
 import {Player} from "./Models/Player";
+import {GameFullError} from "./exceptions/GameFullError";
+import {SuccessfulResponseFactory} from "./Factories/SuccessfulResponseFactory";
+import {FailureResponseFactory} from "./Factories/FailureResponseFactory";
 
 export class GameServer {
     public static readonly PORT:number = Number(process.env.PORT) || 3000
@@ -59,10 +62,13 @@ export class GameServer {
                     game.addPlayer(player)
 
                     this.games[game.gameId] = game
+                    socket.join(game.gameId)
 
-                    socket.emit('create-game', 'successfully created game')
+                    const response = SuccessfulResponseFactory.buildSuccessfullyCreatedGameResponse(game.gameId)
+                    socket.emit('create-game', response.asJson)
                 } catch (e) {
-                    socket.emit('create-game', 'failed to create game')
+                    const response = FailureResponseFactory.buildFailureMessageWithException(e)
+                    socket.emit('create-game', response.asJson)
                 }
             })
 
@@ -78,10 +84,22 @@ export class GameServer {
                     player.socketId = socket.id
 
                     game.addPlayer(player)
+                    socket.join(game.gameId)
 
-                    this.io.emit('join-game', `${details.name} successfully joined game ${details.gameId}`)
+                    const response = SuccessfulResponseFactory.buildSuccessfullyJoinedGameResponse(details)
+                    this.io.to(game.gameId).emit('join-game', response.asJson)
                 } catch (e) {
-                    socket.emit('join-game', `failed to join game ${details.gameId}`)
+                    socket.leave(details.gameId)
+                    socket.disconnect()
+
+                    if (e instanceof GameFullError) {
+                        const response = FailureResponseFactory.buildFailureMessageWithException(e)
+                        socket.emit('join-game', response.asJson)
+                    } else {
+                        const message = `failed to join game ${details.gameId}`
+                        const response = FailureResponseFactory.buildFailureResponseWithMessage(message)
+                        socket.emit('join-game', response.asJson)
+                    }
                 }
             })
 
