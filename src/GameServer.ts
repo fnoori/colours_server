@@ -89,9 +89,6 @@ export class GameServer {
                     const response = SuccessfulResponseFactory.buildSuccessfullyJoinedGameResponse(details)
                     this.io.to(game.gameId).emit('join-game', response.asJson)
                 } catch (e) {
-                    socket.leave(details.gameId)
-                    socket.disconnect()
-
                     if (e instanceof GameFullError) {
                         const response = FailureResponseFactory.buildFailureMessageWithException(e)
                         socket.emit('join-game', response.asJson)
@@ -100,6 +97,9 @@ export class GameServer {
                         const response = FailureResponseFactory.buildFailureResponseWithMessage(message)
                         socket.emit('join-game', response.asJson)
                     }
+
+                    socket.leave(details.gameId)
+                    socket.disconnect()
                 }
             })
 
